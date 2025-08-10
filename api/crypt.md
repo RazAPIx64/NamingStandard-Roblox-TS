@@ -1,180 +1,169 @@
-# Crypt
-
-The **crypt** library provides methods for the encryption and decryption of string data.
-
-Behavior and examples documented on this page are based on Script-Ware.
-
----
-
-## crypt.base64encode
-
-```lua
-function crypt.base64encode(data: string): string
-```
-
-Encodes a string of bytes into Base64.
-
-### Parameters
-
- * `data` - The data to encode.
-
-### Aliases
-
- * `crypt.base64.encode`
- * `crypt.base64_encode`
- * `base64.encode`
- * `base64_encode`
-
-### Example
-
-```lua
-local base64 = crypt.base64encode("Hello, World!")
-local raw = crypt.base64decode(base64)
-
-print(base64) --> SGVsbG8sIFdvcmxkIQ==
-print(raw) --> Hello, World!
-```
-
----
-
-## crypt.base64decode
-
-```lua
-function crypt.base64decode(data: string): string
-```
-
-Decodes a Base64 string to a string of bytes.
-
-### Parameters
-
- * `data` - The data to decode.
-
-### Aliases
-
- * `crypt.base64.decode`
- * `crypt.base64_decode`
- * `base64.decode`
- * `base64_decode`
-
-### Example
-
-```lua
-local base64 = crypt.base64encode("Hello, World!")
-local raw = crypt.base64decode(base64)
-
-print(base64) --> SGVsbG8sIFdvcmxkIQ==
-print(raw) --> Hello, World!
-```
-
----
-
-## crypt.encrypt
-
-`🪲 Compatibility` `🔎 RFC`
-
-```lua
-function crypt.encrypt(data: string, key: string, iv: string?, mode: string?): (string, string)
-```
-
-Encrypts an unencoded string using AES encryption. Returns the base64 encoded and encrypted string, and the IV.
-
-If an AES IV is not provided, a random one will be generated for you, and returned as a 2nd base64 encoded string.
-
-The cipher modes are 'CBC', 'ECB', 'CTR', 'CFB', 'OFB', and 'GCM'. The default is 'CBC'.
-
-> ### 🪲 Compatibility issues
-> Too few executors support this function and a reliable example cannot be made.
-
-### Parameters
-
- * `data` - The unencoded content.
- * `key` - A base64 256-bit key.
- * `iv` - Optional base64 AES initialization vector.
- * `mode` - The AES cipher mode.
-
----
-
-## crypt.decrypt
-
-`🪲 Compatibility` `🔎 RFC`
-
-```lua
-function crypt.decrypt(data: string, key: string, iv: string, mode: string): string
-```
-
-Decrypts the base64 encoded and encrypted content. Returns the raw string.
-
-The cipher modes are 'CBC', 'ECB', 'CTR', 'CFB', 'OFB', and 'GCM'.
-
-> ### 🪲 Compatibility issues
-> Too few executors support this function and a reliable example cannot be made.
-
-### Parameters
-
- * `data` - The base64 encoded and encrypted content.
- * `key` - A base64 256-bit key.
- * `iv` - The base64 AES initialization vector.
- * `mode` - The AES cipher mode.
-
----
-
-## crypt.generatebytes
-
-```lua
-function crypt.generatebytes(size: number): string
-```
-
-Generates a random sequence of bytes of the given size. Returns the sequence as a base64 encoded string.
-
-### Parameters
-
- * `size` - The number of bytes to generate.
-
-### Example
-
-```lua
-local bytes = crypt.generatebytes(16)
-print(bytes) --> bXlzcWwgYm9vbGVhbnM=
-print(#crypt.base64decode(bytes)) --> 16
-```
-
----
-
-## crypt.generatekey
-
-```lua
-function crypt.generatekey(): string
-```
-
-Generates a base64 encoded 256-bit key. The result can be used as the second parameter for the `crypt.encrypt` and `crypt.decrypt` functions.
-
-### Example
-
-```lua
-local bytes = crypt.generatekey()
-print(#crypt.base64decode(bytes)) --> 32 (256 bits)
-```
-
----
-
-## crypt.hash
-
-```lua
-function crypt.hash(data: string, algorithm: string): string
-```
-
-Returns the result of hashing the data using the given algorithm.
-
-Some algorithms include 'sha1', 'sha384', 'sha512', 'md5', 'sha256', 'sha3-224', 'sha3-256', and 'sha3-512'.
-
-### Parameters
-
- * `data` - The unencoded content.
- * `algorithm` - A hash algorithm.
-
-### Example
-
-```lua
-local hash = crypt.hash("Hello, World!", "md5")
-print(hash) --> 65A8E27D8879283831B664BD8B7F0AD4
-```
+// api/crypt.d.ts
+
+/**
+ * The **crypt** library provides methods for the encryption and decryption of string data.
+*/
+
+declare namespace crypt {
+    /**
+     * Encodes a string of bytes into Base64.
+     *
+     * @param data - The raw string data to encode.
+     * @returns Base64-encoded string.
+     *
+     * @example
+     * const encoded = crypt.base64encode("Hello, World!");
+     * print(encoded); // "SGVsbG8sIFdvcmxkIQ=="
+     */
+    export function base64encode(data: string): string;
+
+    /**
+     * Decodes a Base64 string to raw bytes.
+     *
+     * @param data - Base64-encoded string.
+     * @returns Raw decoded string.
+     *
+     * @example
+     * const decoded = crypt.base64decode("SGVsbG8sIFdvcmxkIQ==");
+     * print(decoded); // "Hello, World!"
+     */
+    export function base64decode(data: string): string;
+
+    /**
+     * Encrypts a string using AES.
+     *
+     * Returns a tuple: [encrypted_base64, iv_base64]
+     *
+     * If `iv` is not provided, a random one is generated and returned.
+     * Key must be a 256-bit key (32 bytes), typically Base64-encoded.
+     * Default mode: 'CBC'
+     *
+     * Supported modes: 'CBC', 'ECB', 'CTR', 'CFB', 'OFB', 'GCM'
+     *
+     * 🪲 Compatibility: Not all executors support all modes or this function.
+     *
+     * @param data - The plaintext to encrypt.
+     * @param key - 256-bit key (Base64-encoded).
+     * @param iv - Optional Base64-encoded IV.
+     * @param mode - Cipher mode (default: 'CBC').
+     * @returns LuaTuple<[encryptedData: string, iv: string]>
+     *
+     * @example
+     * const key = crypt.generatekey();
+     * const [encrypted, iv] = crypt.encrypt("secret", key, undefined, "CBC");
+     */
+    export function encrypt(
+        data: string,
+        key: string,
+        iv?: string,
+        mode?: CipherMode
+    ): LuaTuple<[string, string]>;
+
+    /**
+     * Decrypts a Base64-encoded encrypted string.
+     *
+     * @param data - Base64-encoded encrypted data.
+     * @param key - 256-bit key (Base64-encoded).
+     * @param iv - Base64-encoded IV used during encryption.
+     * @param mode - Cipher mode used (must match encryption).
+     * @returns Decrypted plaintext string.
+     *
+     * 🪲 Compatibility: Support varies across executors.
+     *
+     * @example
+     * const decrypted = crypt.decrypt(encrypted, key, iv, "CBC");
+     * assert(decrypted === "secret");
+     */
+    export function decrypt(
+        data: string,
+        key: string,
+        iv: string,
+        mode?: CipherMode
+    ): string;
+
+    /**
+     * Generates a random sequence of bytes of the given size.
+     *
+     * Returns the bytes as a Base64-encoded string.
+     *
+     * @param size - Number of random bytes to generate.
+     * @returns Base64-encoded random bytes.
+     *
+     * @example
+     * const bytes = crypt.generatebytes(16); // 16 raw bytes → Base64
+     * print(crypt.base64decode(bytes).length); // 16
+     */
+    export function generatebytes(size: number): string;
+
+    /**
+     * Generates a Base64-encoded 256-bit (32-byte) key suitable for AES.
+     *
+     * Can be used directly in `encrypt` and `decrypt`.
+     *
+     * @returns Base64-encoded 256-bit key.
+     *
+     * @example
+     * const key = crypt.generatekey();
+     * print(crypt.base64decode(key).length); // 32
+     */
+    export function generatekey(): string;
+
+    /**
+     * Hashes the input string using the specified algorithm.
+     *
+     * @param data - The data to hash.
+     * @param algorithm - One of supported hash algorithms.
+     * @returns Hexadecimal hash string (uppercase).
+     *
+     * Supported algorithms:
+     * - 'md5'
+     * - 'sha1'
+     * - 'sha256'
+     * - 'sha384'
+     * - 'sha512'
+     * - 'sha3-224'
+     * - 'sha3-256'
+     * - 'sha3-512'
+     *
+     * @example
+     * const hash = crypt.hash("Hello", "sha256");
+     * print(hash); // "185F8DB32271FE25F561A6FC938B2E264306EC304EDA518007D1764826381969"
+     */
+    export function hash(data: string, algorithm: HashAlgorithm): string;
+}
+
+/**
+ * Supported AES cipher modes.
+ */
+type CipherMode = 'CBC' | 'ECB' | 'CTR' | 'CFB' | 'OFB' | 'GCM';
+
+/**
+ * Supported hash algorithms.
+ */
+type HashAlgorithm =
+    | 'md5'
+    | 'sha1'
+    | 'sha256'
+    | 'sha384'
+    | 'sha512'
+    | 'sha3-224'
+    | 'sha3-256'
+    | 'sha3-512';
+
+// === Aliases ===
+
+/**
+ * Namespace-style aliases for convenience.
+ */
+declare namespace base64 {
+    export const encode: typeof crypt.base64encode;
+    export const decode: typeof crypt.base64decode;
+}
+
+/**
+ * Direct global aliases (some executors expose these)
+ */
+declare const base64_encode: typeof crypt.base64encode;
+declare const base64_decode: typeof crypt.base64decode;
+declare const crypt_base64_encode: typeof crypt.base64encode;
+declare const crypt_base64_decode: typeof crypt.base64decode;
