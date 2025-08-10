@@ -1,269 +1,151 @@
-# Filesystem
-
-The **filesystem** functions allow read and write access to a designated folder in the directory of the executor, typically called *workspace*.
-
----
-
-## readfile
-
-```lua
-function readfile(path: string): string
-```
-
-Returns the contents of the file located at `path`.
-
-### Parameters
-
- * `path` - The path to the file.
-
-### Example
-
-```lua
-writefile("file.txt", "Hello, world!")
-print(readfile("file.txt")) --> Hello, world!
-```
-
----
-
-## listfiles
-
-```lua
-function listfiles(path: string): {string}
-```
-
-Returns a list of files and folders in the folder located at `path`. The returned list contains whole paths.
-
-### Parameters
-
- * `path` - The path to the folder.
-
-### Example
-
-Prints every file and folder in *workspace*.
-
-```lua
-local function descend(path, level)
-	level = level or 0
-	for _, file in ipairs(listfiles(path)) do
-		print(string.rep("  ", level) .. file)
-		if isfolder(file) then
-			descend(file, level + 1)
-		end
-	end
-end
-
-descend(".")
-```
-
----
-
-## writefile
-
-```lua
-function writefile(path: string, data: string): ()
-```
-
-Writes `data` to the file located at `path` if it is not a folder.
-
-### Parameters
-
- * `path` - A path to the file.
- * `data` - The data to write.
-
-### Example
-
-```lua
-writefile("file.txt", "Hello, world!")
-print(readfile("file.txt")) --> Hello, world!
-```
-
----
-
-## makefolder
-
-```lua
-function makefolder(path: string): ()
-```
-
-Creates a folder at `path` if it does not already exist.
-
-### Parameters
-
- * `path` - The target location.
-
-### Example
-
-```lua
-makefolder("folder")
-writefile("folder/file.txt", "Hello, world!")
-print(readfile("folder/file.txt")) --> Hello, world!
-```
-
----
-
-## appendfile
-
-```lua
-function appendfile(path: string, data: string): ()
-```
-
-Appends `data` to the end of the file located at `path`. Creates the file if it does not exist.
-
-### Parameters
-
- * `path` - A path to the file.
- * `data` - The data to append.
-
-### Example
-
-```lua
-writefile("services.txt", "A list of services:\n")
-
-for _, service in ipairs(game:GetChildren()) do
-	if service.ClassName ~= "" then
-		appendfile("services.txt", service.ClassName .. "\n")
-	end
-end
-```
-
----
-
-## isfile
-
-```lua
-function isfile(path: string): boolean
-```
-
-Returns whether or not `path` points to a file.
-
-### Parameters
-
- * `path` - The path to check.
-
-### Example
-
-```lua
-writefile("file.txt", "Hello, world!")
-print(isfile("file.txt")) --> true
-```
-
----
-
-## isfolder
-
-```lua
-function isfolder(path: string): boolean
-```
-
-Returns whether or not `path` points to a folder.
-
-### Parameters
-
- * `path` - The path to check.
-
-### Example
-
-```lua
-makefolder("folder")
-print(isfolder("folder")) --> true
-```
-
----
-
-## delfile
-
-```lua
-function delfile(path: string): ()
-```
-
-Removes the file located at `path`.
-
-### Parameters
-
- * `path` - The path to the file.
-
-### Example
-
-```lua
-writefile("file.txt", "Hello, world!")
-print(isfile("file.txt")) --> true
-
-delfile("file.txt")
-print(isfile("file.txt")) --> false
-```
-
----
-
-## delfolder
-
-```lua
-function delfolder(path: string): ()
-```
-
-Removes the folder located at `path`.
-
-### Parameters
-
- * `path` - The path to the folder.
-
-### Example
-
-```lua
-makefolder("folder")
-print(isfolder("folder")) --> true
-
-delfolder("folder")
-print(isfolder("folder")) --> false
-```
-
----
-
-## loadfile
-
-```lua
-function loadfile(path: string, chunkname: string?): (function?, string?)
-```
-
-Generates a chunk from the file located at `path`. The environment of the returned function is the global environment.
-
-If there are no compilation errors, the chunk is returned by itself; otherwise, it returns `nil` plus the error message.
-
-`chunkname` is used as the chunk name for error messages and debug information. When absent, it defaults to a **random string**.
-
-### Parameters
-
- * `path` - A path to the file containing Luau code.
- * `chunkname` - Optional name of the chunk.
-
-### Example
-
-```lua
-writefile("file.lua", "local number = ...; return number + 1")
-local func, err = loadfile("file.lua")
-local output = assert(func, err)(1)
-print(output) --> 2
-```
-
----
-
-## dofile
-
-```lua
-function dofile(path: string): ()
-```
-
-Attempts to load the file located at `path` and execute it on a new thread.
-
-> ### 🔎 Note
-> Some executors may provide the file name to the top-level vararg of the file (`...`).
-
-### Parameters
-
- * `path` - The path to the file.
-
-### Example
-
-```lua
-writefile("code.lua", "print('Hello, world!')")
-dofile("code.lua") --> "Hello, world!"
-```
+// api/filesystem.d.ts
+
+/**
+ * The **filesystem** functions allow read and write access to a designated folder
+ * in the executor's directory, typically called *workspace*.
+ *
+ * These functions operate on files and folders using relative or absolute paths.
+ *
+ * ⚠️ All paths are relative to the executor's workspace unless otherwise specified.
+ */
+
+/**
+ * Returns the contents of the file located at `path`.
+ *
+ * @param path - The path to the file.
+ * @returns The raw string content of the file.
+ *
+ * @example
+ * writefile("file.txt", "Hello, world!");
+ * print(readfile("file.txt")); // "Hello, world!"
+ */
+declare function readfile(path: string): string;
+
+/**
+ * Returns a list of files and folders in the folder located at `path`.
+ * The returned paths are full paths (relative to workspace).
+ *
+ * @param path - The path to the folder.
+ * @returns Array of file/folder paths.
+ *
+ * @example
+ * const files = listfiles(".");
+ * files.forEach((file) => print(file));
+ */
+declare function listfiles(path: string): string[];
+
+/**
+ * Writes `data` to the file located at `path`.
+ * Overwrites the file if it exists.
+ *
+ * @param path - Path to the file.
+ * @param data - String data to write.
+ *
+ * @example
+ * writefile("hello.txt", "Hello, world!");
+ */
+declare function writefile(path: string, data: string): void;
+
+/**
+ * Creates a folder at `path` if it does not already exist.
+ *
+ * Intermediate directories are not automatically created.
+ *
+ * @param path - The path of the folder to create.
+ *
+ * @example
+ * makefolder("myfolder");
+ * writefile("myfolder/data.txt", "content");
+ */
+declare function makefolder(path: string): void;
+
+/**
+ * Appends `data` to the end of the file at `path`.
+ * Creates the file if it does not exist.
+ *
+ * @param path - Path to the file.
+ * @param data - Data to append.
+ *
+ * @example
+ * appendfile("log.txt", "Event occurred\n");
+ */
+declare function appendfile(path: string, data: string): void;
+
+/**
+ * Returns whether `path` points to a file.
+ *
+ * @param path - The path to check.
+ * @returns `true` if it's a file, `false` otherwise.
+ *
+ * @example
+ * writefile("test.txt", "data");
+ * print(isfile("test.txt")); // true
+ */
+declare function isfile(path: string): boolean;
+
+/**
+ * Returns whether `path` points to a folder.
+ *
+ * @param path - The path to check.
+ * @returns `true` if it's a folder, `false` otherwise.
+ *
+ * @example
+ * makefolder("saves");
+ * print(isfolder("saves")); // true
+ */
+declare function isfolder(path: string): boolean;
+
+/**
+ * Removes the file located at `path`.
+ *
+ * Does nothing if the file does not exist.
+ *
+ * @param path - Path to the file to delete.
+ *
+ * @example
+ * writefile("temp.txt", "junk");
+ * delfile("temp.txt");
+ * print(isfile("temp.txt")); // false
+ */
+declare function delfile(path: string): void;
+
+/**
+ * Removes the folder located at `path`, including all contents.
+ *
+ * @param path - Path to the folder to delete.
+ *
+ * @example
+ * makefolder("old");
+ * writefile("old/data.txt", "backup");
+ * delfolder("old");
+ * print(isfolder("old")); // false
+ */
+declare function delfolder(path: string): void;
+
+/**
+ * Compiles and returns a function from the Luau code in the file at `path`.
+ *
+ * Returns `[function, undefined]` on success, or `[undefined, errorMessage]` on failure.
+ *
+ * The returned function uses the global environment.
+ *
+ * @param path - Path to the `.lua` file.
+ * @param chunkname - Optional name for debug/error messages.
+ * @returns A tuple: `[compiledFunction, error]`
+ *
+ * @example
+ * writefile("add.lua", "return ... + 1");
+ * const [func, err] = loadfile("add.lua");
+ * const result = assert(func, err)(5); // 6
+ */
+declare function loadfile(
+    path: string,
+    chunkname?: string
+): LuaTuple<[(() => any) | undefined, string | undefined]>;
+
+/**
+ * Loads and executes the file at `path` in a new thread.
+ *
+ * Equivalent to `assert(loadfile(path))()`, but may pass additional context (e.g., filename via `...`).
+ *
+ * @param path - Path to the file
