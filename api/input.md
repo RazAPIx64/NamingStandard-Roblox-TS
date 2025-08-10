@@ -1,167 +1,113 @@
-# Input
+// api/Input.d.ts
 
-The **input** functions allow you to dispatch inputs on behalf of the user.
+/**
+ * The **input** functions allow you to dispatch synthetic inputs on behalf of the user.
+ *
+ * These functions simulate real user input such as:
+ * - Mouse movement (absolute and relative)
+ * - Mouse clicks and button presses
+ * - Scrolling
+ *
+ * ⚠️ These functions only work when the game window is in focus.
+ * Use `isrbxactive()` to check before dispatching input.
+ */
 
----
+/**
+ * Returns whether the game's window is currently in focus.
+ *
+ * Most input functions will fail silently or be ignored if the window is not active.
+ *
+ * @returns `true` if the Roblox window is focused, `false` otherwise.
+ *
+ * @example
+ * if (isrbxactive()) {
+ *     mouse1click();
+ * }
+ */
+declare function isrbxactive(): boolean;
 
-## isrbxactive
+/**
+ * Alias for `isrbxactive`.
+ */
+declare const isgameactive: typeof isrbxactive;
 
-```lua
-function isrbxactive(): boolean
-```
+/**
+ * Dispatches a left mouse button **click** (press + release).
+ *
+ * Simulates a full click at the current cursor position.
+ *
+ * @example
+ * if (isrbxactive()) {
+ *     mouse1click();
+ * }
+ */
+declare function mouse1click(): void;
 
-Returns whether the game's window is in focus. Must be true for other input functions to work.
+/**
+ * Dispatches a left mouse button **press** (down).
+ *
+ * Does not release — use `mouse1release()` to release.
+ */
+declare function mouse1press(): void;
 
-### Aliases
+/**
+ * Dispatches a left mouse button **release** (up).
+ *
+ * Should be used after `mouse1press()` to complete a drag or hold.
+ */
+declare function mouse1release(): void;
 
- * `isgameactive`
+/**
+ * Dispatches a right mouse button **click** (press + release).
+ */
+declare function mouse2click(): void;
 
-### Example
+/**
+ * Dispatches a right mouse button **press** (down).
+ */
+declare function mouse2press(): void;
 
-```lua
-if isrbxactive() then
-	mouse1click()
-end
-```
+/**
+ * Dispatches a right mouse button **release** (up).
+ */
+declare function mouse2release(): void;
 
----
+/**
+ * Moves the mouse cursor to an absolute screen position.
+ *
+ * Coordinates are in pixels from the top-left of the screen.
+ *
+ * @param x - The x-coordinate (pixels).
+ * @param y - The y-coordinate (pixels).
+ *
+ * @example
+ * const viewport = workspace.CurrentCamera.ViewportSize;
+ * mousemoveabs(viewport.X / 2, viewport.Y / 2); // Move to center
+ */
+declare function mousemoveabs(x: number, y: number): void;
 
-## mouse1click
+/**
+ * Moves the mouse cursor by a relative offset.
+ *
+ * Useful for simulating small movements or camera rotation.
+ *
+ * @param x - Horizontal offset (pixels).
+ * @param y - Vertical offset (pixels).
+ *
+ * @example
+ * mousemoverel(10, -5); // Move right 10px, up 5px
+ */
+declare function mousemoverel(x: number, y: number): void;
 
-```lua
-function mouse1click(): ()
-```
-
-Dispatches a left mouse button click.
-
----
-
-## mouse1press
-
-```lua
-function mouse1press(): ()
-```
-
-Dispatches a left mouse button press.
-
----
-
-## mouse1release
-
-```lua
-function mouse1release(): ()
-```
-
-Dispatches a left mouse button release.
-
----
-
-## mouse2click
-
-```lua
-function mouse2click(): ()
-```
-
-Dispatches a right mouse button click.
-
----
-
-## mouse2press
-
-```lua
-function mouse2press(): ()
-```
-
-Dispatches a right mouse button press.
-
----
-
-## mouse2release
-
-```lua
-function mouse2release(): ()
-```
-
-Dispatches a right mouse button release.
-
----
-
-## mousemoveabs
-
-```lua
-function mousemoveabs(x: number, y: number): ()
-```
-
-Moves the mouse cursor to the specified absolute position.
-
-### Parameters
-
- * `x` - The x-coordinate of the mouse cursor.
- * `y` - The y-coordinate of the mouse cursor.
-
-### Example
-
-Move the cursor in a circle around the screen:
-
-```lua
--- Wait for the game window to be selected
-while not isrbxactive() do
-	task.wait()
-end
-
-local size = workspace.CurrentCamera.ViewportSize
-	
-for i = 0, 50 do
-	local x = math.sin(i / 50 * math.pi * 2) / 2 + 0.5
-	local y = math.cos(i / 50 * math.pi * 2) / 2 + 0.5
-	mousemoveabs(x * size.X, y * size.Y)
-	task.wait(0.05)
-end
-```
-
----
-
-## mousemoverel
-
-```lua
-function mousemoverel(x: number, y: number): ()
-```
-
-Adjusts the mouse cursor by the specified relative amount.
-
-### Parameters
-
- * `x` - The x-offset of the mouse cursor.
- * `y` - The y-offset of the mouse cursor.
-
-### Example
-
-Moves the cursor in a small circle:
-
-```lua
--- Wait for the game window to be selected
-while not isrbxactive() do
-	task.wait()
-end
-
-for i = 0, 20 do
-	local x = math.sin(i / 20 * math.pi * 2)
-	local y = math.cos(i / 20 * math.pi * 2)
-	mousemoverel(x * 100, y * 100)
-	task.wait(0.05)
-end
-```
-
----
-
-## mousescroll
-
-```lua
-function mousescroll(pixels: number): ()
-```
-
-Dispatches a mouse scroll by the specified number of pixels.
-
-### Parameters
-
- * `pixels` - The number of pixels to scroll.
+/**
+ * Dispatches a mouse scroll event.
+ *
+ * Positive = scroll up, Negative = scroll down.
+ *
+ * @param pixels - The number of pixels to scroll.
+ *
+ * @example
+ * mousescroll(120);  // Scroll up
+ * mousescroll(-120); // Scroll down
+ */
+declare function mousescroll(pixels: number): void;
