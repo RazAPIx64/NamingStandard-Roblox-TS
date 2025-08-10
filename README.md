@@ -6,4 +6,4 @@ help me in the near future, Including the UNC Test rewritten in Roblox-TS.
 All credits to the original developers of the Unified Naming Convention
 
 Project was already written locally instead of being on Github, so i'll pretty much have to come back and add a bundler for it
-Go [here](CONTRIBUTING.md) for a guide on contributing.
+if you would like to report any issue or would like to contribute to this repository, you can contribute through [here](CONTRIBUTING.md)
